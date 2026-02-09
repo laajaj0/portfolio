@@ -1,20 +1,56 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+<section id="about">
+    <h1>🚀 Developer Portfolio</h1>
+    <p>
+      Welcome to my personal developer portfolio.
+      This project showcases my skills, projects, and experience in
+      <strong>web and mobile development</strong>, with a focus on building
+      clean, modern, and user-friendly applications.
+    </p>
+  </section>
 
-# Run and deploy your AI Studio app
+  <section id="project">
+    <h2>✨ About the Project</h2>
+    <p>
+      This portfolio is designed to present my technical skills, selected
+      projects with real-world use cases, and my background in software
+      development. It also provides an easy way to get in touch with me.
+    </p>
+  </section>
 
-This contains everything you need to run your app locally.
+  <section id="technologies">
+    <h2>🛠️ Technologies Used</h2>
+    <ul>
+      <li>HTML5 / CSS3 / JavaScript</li>
+      <li>React</li>
+      <li>Node.js</li>
+      <li>Git & GitHub</li>
+      <li>Responsive Web Design</li>
+    </ul>
+  </section>
 
-View your app in AI Studio: https://ai.studio/apps/drive/1k2JDAc99WLGuZV3luMloPfYexnwb3555
+  <section id="features">
+    <h2>📂 Features</h2>
+    <ul>
+      <li>Modern and responsive user interface</li>
+      <li>Projects section with detailed descriptions</li>
+      <li>Skills and tools overview</li>
+      <li>Contact section</li>
+    </ul>
+  </section>
 
-## Run Locally
+  <section id="purpose">
+    <h2>🎯 Purpose</h2>
+    <p>
+      This portfolio serves as a professional online presence and a showcase
+      for recruiters, clients, and collaborators who want to explore my work
+      and development journey.
+    </p>
+  </section>
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+  <section id="contact">
+    <h2>📬 Contact</h2>
+    <p>
+      Feel free to reach out for collaboration, freelance opportunities,
+      or any questions.
+    </p>
+  </section>
