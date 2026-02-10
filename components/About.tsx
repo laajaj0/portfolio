@@ -23,15 +23,15 @@ const About: React.FC = () => {
             <ul className="space-y-3 mt-4 text-gray-700">
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                Experience in mobile and web development
+                {t('about_highlight_1')}
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                Passionate about UI/UX and minimalist design
+                {t('about_highlight_2')}
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                Always keeping up with technology trends
+                {t('about_highlight_3')}
               </li>
             </ul>
           </div>
