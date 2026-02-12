@@ -37,6 +37,7 @@ interface DataContextType {
   updateEducation: (edu: Education[], lang?: Language) => void;
   updateSkills: (skills: SkillCategory[], lang?: Language) => void;
   getRawData: (lang: Language) => AppData;
+  saveData: (lang?: Language) => Promise<void>; // Manual save function
   loading: boolean;
   error: string | null;
   saveStatus: 'idle' | 'saving' | 'saved' | 'error';
@@ -191,38 +192,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isAuthenticated, password]);
 
-  // Persistence effects with debouncing
-  useEffect(() => {
-    if (saveTimeoutEn.current) {
-      clearTimeout(saveTimeoutEn.current);
+  // Manual save function - only saves when explicitly called
+  const saveData = useCallback(async (lang?: Language) => {
+    const langsToSave = lang ? [lang] : ['en' as Language, 'fr' as Language];
+
+    for (const l of langsToSave) {
+      const data = l === 'en' ? dataEn : dataFr;
+      await saveToAPI(l, data);
     }
-
-    saveTimeoutEn.current = setTimeout(() => {
-      saveToAPI('en', dataEn);
-    }, 1000); // 1 second debounce
-
-    return () => {
-      if (saveTimeoutEn.current) {
-        clearTimeout(saveTimeoutEn.current);
-      }
-    };
-  }, [dataEn, saveToAPI]);
-
-  useEffect(() => {
-    if (saveTimeoutFr.current) {
-      clearTimeout(saveTimeoutFr.current);
-    }
-
-    saveTimeoutFr.current = setTimeout(() => {
-      saveToAPI('fr', dataFr);
-    }, 1000); // 1 second debounce
-
-    return () => {
-      if (saveTimeoutFr.current) {
-        clearTimeout(saveTimeoutFr.current);
-      }
-    };
-  }, [dataFr, saveToAPI]);
+  }, [dataEn, dataFr, saveToAPI]);
 
   const login = async (u: string, p: string): Promise<boolean> => {
     if (u !== "admin") return false;
@@ -284,6 +262,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateEducation,
       updateSkills,
       getRawData,
+      saveData,
       loading,
       error,
       saveStatus
