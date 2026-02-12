@@ -593,6 +593,12 @@ const Dashboard: React.FC = () => {
                 </div>
               ))}
             </div>
+            <button
+              onClick={() => alert(`Work Experience (${editingLang.toUpperCase()}) Saved!`)}
+              className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors mt-6"
+            >
+              <Save size={18} /> Save Changes
+            </button>
           </div>
         )}
 
@@ -619,6 +625,12 @@ const Dashboard: React.FC = () => {
                 </div>
               ))}
             </div>
+            <button
+              onClick={() => alert(`Education (${editingLang.toUpperCase()}) Saved!`)}
+              className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors mt-6"
+            >
+              <Save size={18} /> Save Changes
+            </button>
           </div>
         )}
 
