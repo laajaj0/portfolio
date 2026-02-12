@@ -560,13 +560,19 @@ const Dashboard: React.FC = () => {
                         />
                       </div>
                       <div className="flex justify-end pt-2">
-                        <button onClick={() => deleteProject(project.id)} className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm font-medium"><Trash2 size={16} /> Delete</button>
+                        <button onClick={() => deleteProject(project.id)} className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm font-medium mt-2"><Trash2 size={16} /> Delete</button>
                       </div>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+            <button
+              onClick={() => alert(`Projects (${editingLang.toUpperCase()}) Saved!`)}
+              className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors mt-6"
+            >
+              <Save size={18} /> Save Changes
+            </button>
           </div>
         )}
 
