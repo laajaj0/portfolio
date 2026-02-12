@@ -205,6 +205,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await saveToAPI(l, data);
     }
 
+    // Wait for Vercel Blob save to complete (important for production)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     // Reload data from localStorage to ensure UI is in sync
     const keyEn = STORAGE_KEY_EN;
     const keyFr = STORAGE_KEY_FR;
