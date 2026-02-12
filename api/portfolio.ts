@@ -1,4 +1,4 @@
-import { put } from '@vercel/blob';
+import { put, head, list } from '@vercel/blob';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const ADMIN_HASH = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8";
@@ -28,22 +28,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // GET: Fetch portfolio data from Blob storage
         if (req.method === 'GET') {
             try {
-                // Construct the public blob URL
-                // Format: https://{account}.public.blob.vercel-storage.com/{pathname}
-                const blobUrl = `https://${process.env.BLOB_READ_WRITE_TOKEN?.split('_')[1]}.public.blob.vercel-storage.com/${blobName}`;
+                // List all blobs and find the one we need
+                const { blobs } = await list();
+                const blob = blobs.find(b => b.pathname === blobName);
 
-                const response = await fetch(blobUrl);
-
-                if (!response.ok) {
+                if (!blob) {
                     return res.status(404).json({
                         error: 'No data found',
                         message: 'Please save data from the dashboard first'
                     });
                 }
 
+                // Fetch the blob content
+                const response = await fetch(blob.url);
+
+                if (!response.ok) {
+                    return res.status(404).json({
+                        error: 'No data found',
+                        message: 'Failed to fetch blob data'
+                    });
+                }
+
                 const data = await response.json();
                 return res.status(200).json(data);
             } catch (error) {
+                console.error('GET Error:', error);
                 return res.status(404).json({
                     error: 'No data found',
                     message: 'Please save data from the dashboard first'
