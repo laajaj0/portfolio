@@ -109,11 +109,14 @@ const Dashboard: React.FC = () => {
   };
 
   const handleEducationChange = (id: number, field: keyof Education, value: any) => {
+    console.log('Education change:', { id, field, value });
     const updated = (currentData.education || []).map(e => e.id === id ? { ...e, [field]: value } : e);
+    console.log('Updated education:', updated);
     updateEducation(updated, editingLang);
   };
 
   const addEducation = () => {
+    console.log('Adding education');
     const newEdu: Education = {
       id: Date.now(),
       degree: 'New Degree',
@@ -125,6 +128,7 @@ const Dashboard: React.FC = () => {
   };
 
   const deleteEducation = (id: number) => {
+    console.log('Deleting education:', id);
     updateEducation((currentData.education || []).filter(e => e.id !== id), editingLang);
   };
 
