@@ -73,7 +73,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleExpChange = (id: number, field: keyof Experience, value: any) => {
-    const updated = currentData.experiences.map(e => e.id === id ? { ...e, [field]: value } : e);
+    const updated = (currentData.experiences || []).map(e => e.id === id ? { ...e, [field]: value } : e);
     updateExperiences(updated, editingLang);
   };
 
@@ -85,15 +85,15 @@ const Dashboard: React.FC = () => {
       period: '2024',
       description: 'Description...'
     };
-    updateExperiences([...currentData.experiences, newExp], editingLang);
+    updateExperiences([...(currentData.experiences || []), newExp], editingLang);
   };
 
   const deleteExp = (id: number) => {
-    updateExperiences(currentData.experiences.filter(e => e.id !== id), editingLang);
+    updateExperiences((currentData.experiences || []).filter(e => e.id !== id), editingLang);
   };
 
   const handleEducationChange = (id: number, field: keyof Education, value: any) => {
-    const updated = currentData.education.map(e => e.id === id ? { ...e, [field]: value } : e);
+    const updated = (currentData.education || []).map(e => e.id === id ? { ...e, [field]: value } : e);
     updateEducation(updated, editingLang);
   };
 
@@ -105,11 +105,11 @@ const Dashboard: React.FC = () => {
       period: '2024',
       description: 'Description...'
     };
-    updateEducation([...currentData.education, newEdu], editingLang);
+    updateEducation([...(currentData.education || []), newEdu], editingLang);
   };
 
   const deleteEducation = (id: number) => {
-    updateEducation(currentData.education.filter(e => e.id !== id), editingLang);
+    updateEducation((currentData.education || []).filter(e => e.id !== id), editingLang);
   };
 
   const handleSkillTitleChange = (index: number, newTitle: string) => {
@@ -585,7 +585,7 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
             <div className="space-y-4">
-              {currentData.experiences.map(exp => (
+              {(currentData.experiences || []).map(exp => (
                 <div key={exp.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                   <div className="grid md:grid-cols-2 gap-4 mb-3">
                     <input type="text" value={exp.role || ''} onChange={e => handleExpChange(exp.id, 'role', e.target.value)} className="w-full p-2 border rounded-lg font-bold" placeholder="Role" />
@@ -617,7 +617,7 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
             <div className="space-y-4">
-              {currentData.education.map(edu => (
+              {(currentData.education || []).map(edu => (
                 <div key={edu.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                   <div className="grid md:grid-cols-2 gap-4 mb-3">
                     <input type="text" value={edu.degree || ''} onChange={e => handleEducationChange(edu.id, 'degree', e.target.value)} className="w-full p-2 border rounded-lg font-bold" placeholder="Degree / Diploma" />
