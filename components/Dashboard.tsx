@@ -583,7 +583,7 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
             <button
-              onClick={() => saveData(editingLang)}
+              onClick={handleSaveAndRedirect}
               className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors mt-6"
             >
               <Save size={18} /> Save Changes
@@ -615,7 +615,7 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
             <button
-              onClick={() => saveData(editingLang)}
+              onClick={handleSaveAndRedirect}
               className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors mt-6"
             >
               <Save size={18} /> Save Changes
@@ -647,7 +647,7 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
             <button
-              onClick={() => saveData(editingLang)}
+              onClick={handleSaveAndRedirect}
               className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors mt-6"
             >
               <Save size={18} /> Save Changes
