@@ -14,7 +14,7 @@ const Timeline: React.FC = () => {
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <Briefcase className="w-5 h-5 text-gray-700" />
-            <h3 className="text-xl font-bold text-gray-800">Work Experience</h3>
+            <h3 className="text-xl font-bold text-gray-800">{t('work_experience')}</h3>
           </div>
           <div className="space-y-8">
             {experiences.map((exp) => (
@@ -38,7 +38,7 @@ const Timeline: React.FC = () => {
         <div className="mb-12">
           <div className="flex items-center gap-2 mb-6">
             <GraduationCap className="w-5 h-5 text-gray-700" />
-            <h3 className="text-xl font-bold text-gray-800">Education</h3>
+            <h3 className="text-xl font-bold text-gray-800">{t('education')}</h3>
           </div>
           <div className="space-y-8">
             {education.map((edu) => (
