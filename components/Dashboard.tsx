@@ -73,17 +73,14 @@ const Dashboard: React.FC = () => {
     updateProjects(currentData.projects.filter(p => p.id !== id), editingLang);
   };
 
-  // Save and redirect to home page
+  // Save and reload page
   const handleSaveAndRedirect = async () => {
     try {
       // Save data
       await saveData(editingLang);
 
-      // Wait for save to complete and localStorage to update
+      // Wait for save to complete and localStorage to update, then reload
       setTimeout(() => {
-        // Navigate to home page (hash routing)
-        window.location.hash = '/';
-        // Force reload to show updated data
         window.location.reload();
       }, 500);
     } catch (error) {
