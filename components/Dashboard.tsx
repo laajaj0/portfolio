@@ -73,6 +73,20 @@ const Dashboard: React.FC = () => {
     updateProjects(currentData.projects.filter(p => p.id !== id), editingLang);
   };
 
+  // Save and redirect to home page
+  const handleSaveAndRedirect = async () => {
+    try {
+      await saveData(editingLang);
+      // Wait a moment for save to complete, then redirect
+      setTimeout(() => {
+        navigate('/');
+      }, 1000);
+    } catch (error) {
+      console.error('Error saving:', error);
+    }
+  };
+
+
   const handleExpChange = (id: number, field: keyof Experience, value: any) => {
     const updated = (currentData.experiences || []).map(e => e.id === id ? { ...e, [field]: value } : e);
     updateExperiences(updated, editingLang);
