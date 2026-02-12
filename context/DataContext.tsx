@@ -146,10 +146,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Debounced save to API
   const saveToAPI = useCallback(async (lang: Language, data: AppData) => {
+    // Always save to localStorage first
+    const key = lang === 'en' ? STORAGE_KEY_EN : STORAGE_KEY_FR;
+    localStorage.setItem(key, JSON.stringify(data));
+
+    // Skip API calls in local development (localhost)
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+    if (isLocalhost) {
+      console.log('Local development: Skipping API save, using localStorage only');
+      return;
+    }
+
     if (!isAuthenticated || !password) {
-      // Just save to localStorage if not authenticated
-      const key = lang === 'en' ? STORAGE_KEY_EN : STORAGE_KEY_FR;
-      localStorage.setItem(key, JSON.stringify(data));
+      console.warn('Not authenticated, skipping API save');
       return;
     }
 
@@ -170,10 +180,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!response.ok) {
         throw new Error('Failed to save data');
       }
-
-      // Also save to localStorage as cache
-      const key = lang === 'en' ? STORAGE_KEY_EN : STORAGE_KEY_FR;
-      localStorage.setItem(key, JSON.stringify(data));
 
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
