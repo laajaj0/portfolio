@@ -204,6 +204,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log(`Saving ${l} data:`, data);
       await saveToAPI(l, data);
     }
+
+    // Reload data from localStorage to ensure UI is in sync
+    const keyEn = STORAGE_KEY_EN;
+    const keyFr = STORAGE_KEY_FR;
+    const savedEn = localStorage.getItem(keyEn);
+    const savedFr = localStorage.getItem(keyFr);
+
+    if (savedEn) {
+      try {
+        const parsedEn = JSON.parse(savedEn);
+        setDataEn(parsedEn);
+      } catch (e) {
+        console.error('Error parsing EN data:', e);
+      }
+    }
+
+    if (savedFr) {
+      try {
+        const parsedFr = JSON.parse(savedFr);
+        setDataFr(parsedFr);
+      } catch (e) {
+        console.error('Error parsing FR data:', e);
+      }
+    }
   }, [dataEn, dataFr, saveToAPI]);
 
   const login = async (u: string, p: string): Promise<boolean> => {
