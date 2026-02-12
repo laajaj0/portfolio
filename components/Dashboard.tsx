@@ -76,13 +76,19 @@ const Dashboard: React.FC = () => {
   // Save and redirect to home page
   const handleSaveAndRedirect = async () => {
     try {
+      // Save data
       await saveData(editingLang);
-      // Wait a moment for save to complete, then redirect
+
+      // Wait for save to complete and localStorage to update
       setTimeout(() => {
-        navigate('/');
-      }, 1000);
+        // Navigate to home page (hash routing)
+        window.location.hash = '/';
+        // Force reload to show updated data
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error('Error saving:', error);
+      alert('Error saving data. Please try again.');
     }
   };
 
