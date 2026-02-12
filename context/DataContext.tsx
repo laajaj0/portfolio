@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import {
   PERSONAL_INFO_EN, PROJECTS_EN, EXPERIENCES_EN, SKILL_CATEGORIES_EN,
   PERSONAL_INFO_FR, PROJECTS_FR, EXPERIENCES_FR, SKILL_CATEGORIES_FR,
@@ -34,22 +34,28 @@ interface DataContextType {
   updateExperiences: (exp: Experience[], lang?: Language) => void;
   updateSkills: (skills: SkillCategory[], lang?: Language) => void;
   getRawData: (lang: Language) => AppData;
+  loading: boolean;
+  error: string | null;
+  saveStatus: 'idle' | 'saving' | 'saved' | 'error';
 }
 
 const DataContext = createContext<DataContextType | null>(null);
 
+const getDefaults = (lang: Language): AppData => {
+  return lang === 'en'
+    ? { personalInfo: PERSONAL_INFO_EN, projects: PROJECTS_EN, experiences: EXPERIENCES_EN, skills: SKILL_CATEGORIES_EN }
+    : { personalInfo: PERSONAL_INFO_FR, projects: PROJECTS_FR, experiences: EXPERIENCES_FR, skills: SKILL_CATEGORIES_FR };
+};
 
 const getInitialData = (lang: Language): AppData => {
   const key = lang === 'en' ? STORAGE_KEY_EN : STORAGE_KEY_FR;
-  const defaults = lang === 'en'
-    ? { personalInfo: PERSONAL_INFO_EN, projects: PROJECTS_EN, experiences: EXPERIENCES_EN, skills: SKILL_CATEGORIES_EN }
-    : { personalInfo: PERSONAL_INFO_FR, projects: PROJECTS_FR, experiences: EXPERIENCES_FR, skills: SKILL_CATEGORIES_FR };
+  const defaults = getDefaults(lang);
 
+  // Try localStorage first (for offline support)
   const saved = localStorage.getItem(key);
   if (saved) {
     try {
       const parsedData = JSON.parse(saved);
-      // Merge saved data with defaults to ensure new fields are present
       return {
         personalInfo: { ...defaults.personalInfo, ...parsedData.personalInfo },
         projects: parsedData.projects || defaults.projects,
@@ -66,18 +72,129 @@ const getInitialData = (lang: Language): AppData => {
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('fr');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const [dataEn, setDataEn] = useState<AppData>(() => getInitialData('en'));
   const [dataFr, setDataFr] = useState<AppData>(() => getInitialData('fr'));
 
-  // Persistence effects
+  const saveTimeoutEn = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveTimeoutFr = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Fetch data from API on mount
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_EN, JSON.stringify(dataEn));
-  }, [dataEn]);
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Fetch both languages
+        const [enResponse, frResponse] = await Promise.all([
+          fetch('/api/portfolio?lang=en'),
+          fetch('/api/portfolio?lang=fr')
+        ]);
+
+        if (enResponse.ok) {
+          const enData = await enResponse.json();
+          setDataEn(enData);
+          localStorage.setItem(STORAGE_KEY_EN, JSON.stringify(enData));
+        } else if (enResponse.status !== 404) {
+          console.warn('Failed to fetch EN data:', await enResponse.text());
+        }
+
+        if (frResponse.ok) {
+          const frData = await frResponse.json();
+          setDataFr(frData);
+          localStorage.setItem(STORAGE_KEY_FR, JSON.stringify(frData));
+        } else if (frResponse.status !== 404) {
+          console.warn('Failed to fetch FR data:', await frResponse.text());
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Failed to load data from server. Using local cache.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Debounced save to API
+  const saveToAPI = useCallback(async (lang: Language, data: AppData) => {
+    if (!isAuthenticated || !password) {
+      // Just save to localStorage if not authenticated
+      const key = lang === 'en' ? STORAGE_KEY_EN : STORAGE_KEY_FR;
+      localStorage.setItem(key, JSON.stringify(data));
+      return;
+    }
+
+    setSaveStatus('saving');
+
+    try {
+      const response = await fetch('/api/portfolio?lang=' + lang, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          password,
+          data
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save data');
+      }
+
+      // Also save to localStorage as cache
+      const key = lang === 'en' ? STORAGE_KEY_EN : STORAGE_KEY_FR;
+      localStorage.setItem(key, JSON.stringify(data));
+
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (err) {
+      console.error('Error saving data:', err);
+      setSaveStatus('error');
+      setError('Failed to save data to server');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
+  }, [isAuthenticated, password]);
+
+  // Persistence effects with debouncing
+  useEffect(() => {
+    if (saveTimeoutEn.current) {
+      clearTimeout(saveTimeoutEn.current);
+    }
+
+    saveTimeoutEn.current = setTimeout(() => {
+      saveToAPI('en', dataEn);
+    }, 1000); // 1 second debounce
+
+    return () => {
+      if (saveTimeoutEn.current) {
+        clearTimeout(saveTimeoutEn.current);
+      }
+    };
+  }, [dataEn, saveToAPI]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_FR, JSON.stringify(dataFr));
-  }, [dataFr]);
+    if (saveTimeoutFr.current) {
+      clearTimeout(saveTimeoutFr.current);
+    }
+
+    saveTimeoutFr.current = setTimeout(() => {
+      saveToAPI('fr', dataFr);
+    }, 1000); // 1 second debounce
+
+    return () => {
+      if (saveTimeoutFr.current) {
+        clearTimeout(saveTimeoutFr.current);
+      }
+    };
+  }, [dataFr, saveToAPI]);
 
   const login = async (u: string, p: string): Promise<boolean> => {
     if (u !== "admin") return false;
@@ -89,6 +206,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       if (hashHex === ADMIN_HASH) {
         setIsAuthenticated(true);
+        setPassword(p); // Store password for API calls
         return true;
       }
     } catch (error) {
@@ -98,7 +216,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
-  const logout = () => setIsAuthenticated(false);
+  const logout = () => {
+    setIsAuthenticated(false);
+    setPassword('');
+  };
+
   const toggleLanguage = () => setLanguage(prev => prev === 'en' ? 'fr' : 'en');
   const t = (key: string): string => (TRANSLATIONS[language] as any)[key] || key;
 
@@ -131,7 +253,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateProjects,
       updateExperiences,
       updateSkills,
-      getRawData
+      getRawData,
+      loading,
+      error,
+      saveStatus
     }}>
       {children}
     </DataContext.Provider>

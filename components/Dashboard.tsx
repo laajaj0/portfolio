@@ -19,7 +19,8 @@ const Dashboard: React.FC = () => {
     updateProjects,
     updateExperiences,
     updateSkills,
-    logout
+    logout,
+    saveStatus
   } = useData();
 
   const navigate = useNavigate();
@@ -189,8 +190,40 @@ const Dashboard: React.FC = () => {
       </aside>
 
       <main className="flex-1 p-8 overflow-y-auto">
-        <div className="mb-6 flex items-center gap-2 text-sm text-gray-500 bg-white inline-block px-4 py-2 rounded-full shadow-sm">
-          <Globe size={16} /> Editing Content for: <span className="font-bold text-black uppercase">{editingLang === 'en' ? 'English' : 'French'}</span>
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex items-center gap-2 text-sm text-gray-500 bg-white px-4 py-2 rounded-full shadow-sm">
+            <Globe size={16} /> Editing Content for: <span className="font-bold text-black uppercase">{editingLang === 'en' ? 'English' : 'French'}</span>
+          </div>
+
+          {saveStatus !== 'idle' && (
+            <div className={`flex items-center gap-2 text-sm px-4 py-2 rounded-full shadow-sm ${saveStatus === 'saving' ? 'bg-blue-50 text-blue-700' :
+                saveStatus === 'saved' ? 'bg-green-50 text-green-700' :
+                  'bg-red-50 text-red-700'
+              }`}>
+              {saveStatus === 'saving' && (
+                <>
+                  <div className="w-3 h-3 border-2 border-blue-700 border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </>
+              )}
+              {saveStatus === 'saved' && (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Saved
+                </>
+              )}
+              {saveStatus === 'error' && (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Error saving
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {activeTab === 'info' && (
