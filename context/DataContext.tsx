@@ -1,11 +1,11 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import {
-  PERSONAL_INFO_EN, PROJECTS_EN, EXPERIENCES_EN, SKILL_CATEGORIES_EN,
-  PERSONAL_INFO_FR, PROJECTS_FR, EXPERIENCES_FR, SKILL_CATEGORIES_FR,
+  PERSONAL_INFO_EN, PROJECTS_EN, EXPERIENCES_EN, EDUCATION_EN, SKILL_CATEGORIES_EN,
+  PERSONAL_INFO_FR, PROJECTS_FR, EXPERIENCES_FR, EDUCATION_FR, SKILL_CATEGORIES_FR,
   TRANSLATIONS
 } from '../constants';
-import { Project, Experience, SkillCategory, PersonalInfo, Language } from '../types';
+import { Project, Experience, Education, SkillCategory, PersonalInfo, Language } from '../types';
 
 const ADMIN_HASH = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8";
 const STORAGE_KEY_EN = 'portfolio_data_en';
@@ -15,6 +15,7 @@ interface AppData {
   personalInfo: PersonalInfo;
   projects: Project[];
   experiences: Experience[];
+  education: Education[];
   skills: SkillCategory[];
 }
 
@@ -22,6 +23,7 @@ interface DataContextType {
   personalInfo: PersonalInfo;
   projects: Project[];
   experiences: Experience[];
+  education: Education[];
   skills: SkillCategory[];
   t: (key: string) => string;
   language: Language;
@@ -32,6 +34,7 @@ interface DataContextType {
   updatePersonalInfo: (info: PersonalInfo, lang?: Language) => void;
   updateProjects: (projects: Project[], lang?: Language) => void;
   updateExperiences: (exp: Experience[], lang?: Language) => void;
+  updateEducation: (edu: Education[], lang?: Language) => void;
   updateSkills: (skills: SkillCategory[], lang?: Language) => void;
   getRawData: (lang: Language) => AppData;
   loading: boolean;
@@ -43,8 +46,8 @@ const DataContext = createContext<DataContextType | null>(null);
 
 const getDefaults = (lang: Language): AppData => {
   return lang === 'en'
-    ? { personalInfo: PERSONAL_INFO_EN, projects: PROJECTS_EN, experiences: EXPERIENCES_EN, skills: SKILL_CATEGORIES_EN }
-    : { personalInfo: PERSONAL_INFO_FR, projects: PROJECTS_FR, experiences: EXPERIENCES_FR, skills: SKILL_CATEGORIES_FR };
+    ? { personalInfo: PERSONAL_INFO_EN, projects: PROJECTS_EN, experiences: EXPERIENCES_EN, education: EDUCATION_EN, skills: SKILL_CATEGORIES_EN }
+    : { personalInfo: PERSONAL_INFO_FR, projects: PROJECTS_FR, experiences: EXPERIENCES_FR, education: EDUCATION_FR, skills: SKILL_CATEGORIES_FR };
 };
 
 const getInitialData = (lang: Language): AppData => {
@@ -60,6 +63,7 @@ const getInitialData = (lang: Language): AppData => {
         personalInfo: { ...defaults.personalInfo, ...parsedData.personalInfo },
         projects: parsedData.projects || defaults.projects,
         experiences: parsedData.experiences || defaults.experiences,
+        education: parsedData.education || defaults.education,
         skills: parsedData.skills || defaults.skills
       };
     } catch (e) {
@@ -235,6 +239,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updatePersonalInfo = (info: PersonalInfo, lang: Language = language) => updateData(lang, 'personalInfo', info);
   const updateProjects = (projects: Project[], lang: Language = language) => updateData(lang, 'projects', projects);
   const updateExperiences = (exp: Experience[], lang: Language = language) => updateData(lang, 'experiences', exp);
+  const updateEducation = (edu: Education[], lang: Language = language) => updateData(lang, 'education', edu);
   const updateSkills = (skills: SkillCategory[], lang: Language = language) => updateData(lang, 'skills', skills);
 
   const getRawData = (lang: Language) => lang === 'en' ? dataEn : dataFr;
@@ -252,6 +257,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatePersonalInfo,
       updateProjects,
       updateExperiences,
+      updateEducation,
       updateSkills,
       getRawData,
       loading,

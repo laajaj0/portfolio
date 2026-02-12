@@ -34,7 +34,14 @@ export interface Experience {
   company: string;
   period: string;
   description: string;
-  type: 'education' | 'work';
+}
+
+export interface Education {
+  id: number;
+  degree: string;
+  school: string;
+  period: string;
+  description: string;
 }
 
 export interface PersonalInfo {

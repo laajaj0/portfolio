@@ -1,5 +1,5 @@
 
-import { SkillCategory, Project, Experience, NavItem, PersonalInfo } from "./types";
+import { SkillCategory, Project, Experience, Education, NavItem, PersonalInfo } from "./types";
 
 // --- TRANSLATIONS FOR STATIC UI ---
 export const TRANSLATIONS = {
@@ -140,28 +140,28 @@ export const PROJECTS_EN: Project[] = [
 
 export const EXPERIENCES_EN: Experience[] = [
   {
-    id: 1,
-    role: "Bachelor in AI",
-    company: "University / School",
-    period: "2024 - Present",
-    description: "Machine Learning & Data Science",
-    type: "education"
-  },
-  {
     id: 2,
     role: "Full Stack Developer",
     company: "Freelance",
     period: "2023 - Present",
-    description: "Developing web and mobile solutions for various clients.",
-    type: "work"
+    description: "Developing web and mobile solutions for various clients."
+  }
+];
+
+export const EDUCATION_EN: Education[] = [
+  {
+    id: 1,
+    degree: "Bachelor in Artificial Intelligence",
+    school: "University / School",
+    period: "2024 - Present",
+    description: "Machine Learning & Data Science"
   },
   {
     id: 3,
-    role: "Digital Dev Technician",
-    company: "OFPPT",
+    degree: "Digital Development Technician",
+    school: "OFPPT",
     period: "2021 - 2023",
-    description: "Intensive training in software development.",
-    type: "education"
+    description: "Intensive training in software development."
   }
 ];
 
@@ -259,28 +259,28 @@ export const PROJECTS_FR: Project[] = [
 
 export const EXPERIENCES_FR: Experience[] = [
   {
-    id: 1,
-    role: "Licence en Intelligence Artificielle",
-    company: "Université / École",
-    period: "2024 - Présent",
-    description: "Machine Learning & Data Science",
-    type: "education"
-  },
-  {
     id: 2,
     role: "Développeur Full Stack",
     company: "Freelance",
     period: "2023 - Présent",
-    description: "Développement de solutions web et mobiles pour divers clients.",
-    type: "work"
+    description: "Développement de solutions web et mobiles pour divers clients."
+  }
+];
+
+export const EDUCATION_FR: Education[] = [
+  {
+    id: 1,
+    degree: "Licence en Intelligence Artificielle",
+    school: "Université / École",
+    period: "2024 - Présent",
+    description: "Machine Learning & Data Science"
   },
   {
     id: 3,
-    role: "Technicien Dév. Digital",
-    company: "OFPPT",
+    degree: "Technicien Développement Digital",
+    school: "OFPPT",
     period: "2021 - 2023",
-    description: "Formation intensive en développement logiciel.",
-    type: "education"
+    description: "Formation intensive en développement logiciel."
   }
 ];
 

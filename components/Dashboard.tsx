@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Save, Plus, Trash2, User, Briefcase, Code2, FolderGit2, X, Globe, Layout, Server, Smartphone, Image } from 'lucide-react';
-import { Project, Experience, Language } from '../types';
+import { LogOut, Save, Plus, Trash2, User, Briefcase, Code2, FolderGit2, X, Globe, Layout, Server, Smartphone, Image, GraduationCap } from 'lucide-react';
+import { Project, Experience, Education, Language } from '../types';
 
 // Map for safe dynamic icon rendering
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
@@ -18,13 +18,14 @@ const Dashboard: React.FC = () => {
     updatePersonalInfo,
     updateProjects,
     updateExperiences,
+    updateEducation,
     updateSkills,
     logout,
     saveStatus
   } = useData();
 
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'info' | 'projects' | 'experience' | 'skills' | 'images'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'projects' | 'experience' | 'education' | 'skills' | 'images'>('info');
   const [editingLang, setEditingLang] = useState<Language>('fr');
 
   // Load data based on selected editing language
@@ -82,14 +83,33 @@ const Dashboard: React.FC = () => {
       role: 'New Role',
       company: 'Company',
       period: '2024',
-      description: 'Description...',
-      type: 'work'
+      description: 'Description...'
     };
     updateExperiences([...currentData.experiences, newExp], editingLang);
   };
 
   const deleteExp = (id: number) => {
     updateExperiences(currentData.experiences.filter(e => e.id !== id), editingLang);
+  };
+
+  const handleEducationChange = (id: number, field: keyof Education, value: any) => {
+    const updated = currentData.education.map(e => e.id === id ? { ...e, [field]: value } : e);
+    updateEducation(updated, editingLang);
+  };
+
+  const addEducation = () => {
+    const newEdu: Education = {
+      id: Date.now(),
+      degree: 'New Degree',
+      school: 'School Name',
+      period: '2024',
+      description: 'Description...'
+    };
+    updateEducation([...currentData.education, newEdu], editingLang);
+  };
+
+  const deleteEducation = (id: number) => {
+    updateEducation(currentData.education.filter(e => e.id !== id), editingLang);
   };
 
   const handleSkillTitleChange = (index: number, newTitle: string) => {
@@ -176,6 +196,9 @@ const Dashboard: React.FC = () => {
           <button onClick={() => setActiveTab('experience')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'experience' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}>
             <Briefcase size={18} /> Experience
           </button>
+          <button onClick={() => setActiveTab('education')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'education' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}>
+            <GraduationCap size={18} /> Education
+          </button>
           <button onClick={() => setActiveTab('skills')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${activeTab === 'skills' ? 'bg-white text-black' : 'hover:bg-gray-800'}`}>
             <Code2 size={18} /> Skills
           </button>
@@ -197,8 +220,8 @@ const Dashboard: React.FC = () => {
 
           {saveStatus !== 'idle' && (
             <div className={`flex items-center gap-2 text-sm px-4 py-2 rounded-full shadow-sm ${saveStatus === 'saving' ? 'bg-blue-50 text-blue-700' :
-                saveStatus === 'saved' ? 'bg-green-50 text-green-700' :
-                  'bg-red-50 text-red-700'
+              saveStatus === 'saved' ? 'bg-green-50 text-green-700' :
+                'bg-red-50 text-red-700'
               }`}>
               {saveStatus === 'saving' && (
                 <>
@@ -550,7 +573,7 @@ const Dashboard: React.FC = () => {
         {activeTab === 'experience' && (
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold flex items-center gap-2"><Briefcase /> Experience ({editingLang.toUpperCase()})</h2>
+              <h2 className="text-2xl font-bold flex items-center gap-2"><Briefcase /> Work Experience ({editingLang.toUpperCase()})</h2>
               <button onClick={addExp} className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg text-sm font-medium">
                 <Plus size={16} /> Add Experience
               </button>
@@ -562,16 +585,36 @@ const Dashboard: React.FC = () => {
                     <input type="text" value={exp.role || ''} onChange={e => handleExpChange(exp.id, 'role', e.target.value)} className="w-full p-2 border rounded-lg font-bold" placeholder="Role" />
                     <input type="text" value={exp.company || ''} onChange={e => handleExpChange(exp.id, 'company', e.target.value)} className="w-full p-2 border rounded-lg" placeholder="Company" />
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4 mb-3">
-                    <input type="text" value={exp.period || ''} onChange={e => handleExpChange(exp.id, 'period', e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Period" />
-                    <select value={exp.type} onChange={e => handleExpChange(exp.id, 'type', e.target.value)} className="w-full p-2 border rounded-lg text-sm">
-                      <option value="work">Work</option>
-                      <option value="education">Education</option>
-                    </select>
-                  </div>
+                  <input type="text" value={exp.period || ''} onChange={e => handleExpChange(exp.id, 'period', e.target.value)} className="w-full p-2 border rounded-lg text-sm mb-3" placeholder="Period (e.g., 2023 - Present)" />
                   <textarea rows={2} value={exp.description || ''} onChange={e => handleExpChange(exp.id, 'description', e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Description" />
                   <div className="flex justify-end pt-2">
                     <button onClick={() => deleteExp(exp.id)} className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm font-medium"><Trash2 size={16} /> Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'education' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold flex items-center gap-2"><GraduationCap /> Education / Formation ({editingLang.toUpperCase()})</h2>
+              <button onClick={addEducation} className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg text-sm font-medium">
+                <Plus size={16} /> Add Education
+              </button>
+            </div>
+            <div className="space-y-4">
+              {currentData.education.map(edu => (
+                <div key={edu.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                  <div className="grid md:grid-cols-2 gap-4 mb-3">
+                    <input type="text" value={edu.degree || ''} onChange={e => handleEducationChange(edu.id, 'degree', e.target.value)} className="w-full p-2 border rounded-lg font-bold" placeholder="Degree / Diploma" />
+                    <input type="text" value={edu.school || ''} onChange={e => handleEducationChange(edu.id, 'school', e.target.value)} className="w-full p-2 border rounded-lg" placeholder="School / University" />
+                  </div>
+                  <input type="text" value={edu.period || ''} onChange={e => handleEducationChange(edu.id, 'period', e.target.value)} className="w-full p-2 border rounded-lg text-sm mb-3" placeholder="Period (e.g., 2021 - 2023)" />
+                  <textarea rows={2} value={edu.description || ''} onChange={e => handleEducationChange(edu.id, 'description', e.target.value)} className="w-full p-2 border rounded-lg text-sm" placeholder="Description" />
+                  <div className="flex justify-end pt-2">
+                    <button onClick={() => deleteEducation(edu.id)} className="text-red-500 hover:text-red-700 flex items-center gap-1 text-sm font-medium"><Trash2 size={16} /> Delete</button>
                   </div>
                 </div>
               ))}
