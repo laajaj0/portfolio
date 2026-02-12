@@ -73,19 +73,17 @@ const Dashboard: React.FC = () => {
     updateProjects(currentData.projects.filter(p => p.id !== id), editingLang);
   };
 
-  // Save and reload page
+  // Save data and show success message
   const handleSaveAndRedirect = async () => {
     try {
       // Save data
       await saveData(editingLang);
 
-      // Wait for save to complete and localStorage to update, then reload
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
+      // Show success message
+      alert(`✅ Data saved successfully! (${editingLang.toUpperCase()})`);
     } catch (error) {
       console.error('Error saving:', error);
-      alert('Error saving data. Please try again.');
+      alert('❌ Error saving data. Please try again.');
     }
   };
 

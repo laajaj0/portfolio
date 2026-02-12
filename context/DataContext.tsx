@@ -194,10 +194,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Manual save function - only saves when explicitly called
   const saveData = useCallback(async (lang?: Language) => {
+    // Small delay to ensure all React state updates are applied
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     const langsToSave = lang ? [lang] : ['en' as Language, 'fr' as Language];
 
     for (const l of langsToSave) {
       const data = l === 'en' ? dataEn : dataFr;
+      console.log(`Saving ${l} data:`, data);
       await saveToAPI(l, data);
     }
   }, [dataEn, dataFr, saveToAPI]);
