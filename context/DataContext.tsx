@@ -102,16 +102,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (enResponse.ok) {
           const enData = await enResponse.json();
-          setDataEn(enData);
-          localStorage.setItem(STORAGE_KEY_EN, JSON.stringify(enData));
+          const defaultsEn = getDefaults('en');
+          // Merge with defaults to ensure all fields exist
+          const mergedEnData = {
+            personalInfo: { ...defaultsEn.personalInfo, ...enData.personalInfo },
+            projects: enData.projects || defaultsEn.projects,
+            experiences: enData.experiences || defaultsEn.experiences,
+            education: enData.education || defaultsEn.education,
+            skills: enData.skills || defaultsEn.skills
+          };
+          setDataEn(mergedEnData);
+          localStorage.setItem(STORAGE_KEY_EN, JSON.stringify(mergedEnData));
         } else if (enResponse.status !== 404) {
           console.warn('Failed to fetch EN data:', await enResponse.text());
         }
 
         if (frResponse.ok) {
           const frData = await frResponse.json();
-          setDataFr(frData);
-          localStorage.setItem(STORAGE_KEY_FR, JSON.stringify(frData));
+          const defaultsFr = getDefaults('fr');
+          // Merge with defaults to ensure all fields exist
+          const mergedFrData = {
+            personalInfo: { ...defaultsFr.personalInfo, ...frData.personalInfo },
+            projects: frData.projects || defaultsFr.projects,
+            experiences: frData.experiences || defaultsFr.experiences,
+            education: frData.education || defaultsFr.education,
+            skills: frData.skills || defaultsFr.skills
+          };
+          setDataFr(mergedFrData);
+          localStorage.setItem(STORAGE_KEY_FR, JSON.stringify(mergedFrData));
         } else if (frResponse.status !== 404) {
           console.warn('Failed to fetch FR data:', await frResponse.text());
         }

@@ -17,7 +17,7 @@ const Timeline: React.FC = () => {
             <h3 className="text-xl font-bold text-gray-800">{t('work_experience')}</h3>
           </div>
           <div className="space-y-8">
-            {experiences.map((exp) => (
+            {(experiences || []).map((exp) => (
               <div key={exp.id} className="grid grid-cols-1 md:grid-cols-[200px_1fr_auto] gap-4 md:gap-8 items-start border-b border-gray-100 pb-8 last:border-0">
                 <span className="text-gray-500 font-medium">{exp.period}</span>
                 <div>
@@ -41,7 +41,7 @@ const Timeline: React.FC = () => {
             <h3 className="text-xl font-bold text-gray-800">{t('education')}</h3>
           </div>
           <div className="space-y-8">
-            {education.map((edu) => (
+            {(education || []).map((edu) => (
               <div key={edu.id} className="grid grid-cols-1 md:grid-cols-[200px_1fr_auto] gap-4 md:gap-8 items-start border-b border-gray-100 pb-8 last:border-0">
                 <span className="text-gray-500 font-medium">{edu.period}</span>
                 <div>
