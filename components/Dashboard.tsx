@@ -76,14 +76,11 @@ const Dashboard: React.FC = () => {
   // Save data and show success message
   const handleSaveAndRedirect = async () => {
     try {
-      // Save data
+      // Save data (this also updates React state from localStorage)
       await saveData(editingLang);
 
       // Show success message
-      alert(`✅ Data saved successfully! (${editingLang.toUpperCase()})\n\nPage will reload to show changes.`);
-
-      // Reload page to refresh all data
-      window.location.reload();
+      alert(`✅ Data saved successfully! (${editingLang.toUpperCase()})\n\nChanges will appear on the Home page.`);
     } catch (error) {
       console.error('Error saving:', error);
       alert('❌ Error saving data. Please try again.');
