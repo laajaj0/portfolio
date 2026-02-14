@@ -92,7 +92,7 @@ export const PERSONAL_INFO_EN: PersonalInfo = {
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg",
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg"
   ],
-  aboutImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+  aboutImage: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80",
   resumeUrl: "/resume.pdf"
 };
 

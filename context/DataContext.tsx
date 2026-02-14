@@ -6,6 +6,10 @@ import {
   TRANSLATIONS
 } from '../constants';
 import { Project, Experience, Education, SkillCategory, PersonalInfo, Language } from '../types';
+import {
+  getExperiences, getEducation, getPersonalInfo, getProjects, getSkills,
+  saveAllExperiences, saveAllEducation, savePersonalInfo, saveAllProjects, saveAllSkills
+} from '../lib/api';
 
 const ADMIN_HASH = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8";
 const STORAGE_KEY_EN = 'portfolio_data_en';
@@ -51,6 +55,29 @@ const getDefaults = (lang: Language): AppData => {
     : { personalInfo: PERSONAL_INFO_FR, projects: PROJECTS_FR, experiences: EXPERIENCES_FR, education: EDUCATION_FR, skills: SKILL_CATEGORIES_FR };
 };
 
+// Helper function to merge personal info, preferring database values over defaults
+const mergePersonalInfo = (dbInfo: PersonalInfo | null, defaults: PersonalInfo): PersonalInfo => {
+  if (!dbInfo) return defaults;
+
+  // Field-by-field merge: use database value if present, otherwise use default
+  return {
+    name: dbInfo.name ?? defaults.name,
+    role: dbInfo.role ?? defaults.role,
+    title: dbInfo.title ?? defaults.title,
+    bio: dbInfo.bio ?? defaults.bio,
+    aboutText: dbInfo.aboutText ?? defaults.aboutText,
+    email: dbInfo.email ?? defaults.email,
+    phone: dbInfo.phone ?? defaults.phone,
+    location: dbInfo.location ?? defaults.location,
+    linkedin: dbInfo.linkedin ?? defaults.linkedin,
+    github: dbInfo.github ?? defaults.github,
+    avatarUrl: dbInfo.avatarUrl ?? defaults.avatarUrl,
+    techStackIcons: dbInfo.techStackIcons ?? defaults.techStackIcons,
+    aboutImage: dbInfo.aboutImage ?? defaults.aboutImage,
+    resumeUrl: dbInfo.resumeUrl ?? defaults.resumeUrl
+  };
+};
+
 const getInitialData = (lang: Language): AppData => {
   const key = lang === 'en' ? STORAGE_KEY_EN : STORAGE_KEY_FR;
   const defaults = getDefaults(lang);
@@ -88,54 +115,58 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const saveTimeoutEn = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saveTimeoutFr = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Fetch data from API on mount
+  // Fetch data from Supabase on mount
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // Fetch both languages
-        const [enResponse, frResponse] = await Promise.all([
-          fetch('/api/portfolio?lang=en'),
-          fetch('/api/portfolio?lang=fr')
+        // Fetch all data from Supabase for both languages
+        const [
+          experiencesEn, educationEn, personalInfoEn, projectsEn, skillsEn,
+          experiencesFr, educationFr, personalInfoFr, projectsFr, skillsFr
+        ] = await Promise.all([
+          getExperiences('en'),
+          getEducation('en'),
+          getPersonalInfo('en'),
+          getProjects('en'),
+          getSkills('en'),
+          getExperiences('fr'),
+          getEducation('fr'),
+          getPersonalInfo('fr'),
+          getProjects('fr'),
+          getSkills('fr')
         ]);
 
-        if (enResponse.ok) {
-          const enData = await enResponse.json();
-          const defaultsEn = getDefaults('en');
-          // Merge with defaults to ensure all fields exist
-          const mergedEnData = {
-            personalInfo: { ...defaultsEn.personalInfo, ...enData.personalInfo },
-            projects: enData.projects || defaultsEn.projects,
-            experiences: enData.experiences || defaultsEn.experiences,
-            education: enData.education || defaultsEn.education,
-            skills: enData.skills || defaultsEn.skills
-          };
-          setDataEn(mergedEnData);
-          localStorage.setItem(STORAGE_KEY_EN, JSON.stringify(mergedEnData));
-        } else if (enResponse.status !== 404) {
-          console.warn('Failed to fetch EN data:', await enResponse.text());
-        }
+        const defaultsEn = getDefaults('en');
+        const defaultsFr = getDefaults('fr');
 
-        if (frResponse.ok) {
-          const frData = await frResponse.json();
-          const defaultsFr = getDefaults('fr');
-          // Merge with defaults to ensure all fields exist
-          const mergedFrData = {
-            personalInfo: { ...defaultsFr.personalInfo, ...frData.personalInfo },
-            projects: frData.projects || defaultsFr.projects,
-            experiences: frData.experiences || defaultsFr.experiences,
-            education: frData.education || defaultsFr.education,
-            skills: frData.skills || defaultsFr.skills
-          };
-          setDataFr(mergedFrData);
-          localStorage.setItem(STORAGE_KEY_FR, JSON.stringify(mergedFrData));
-        } else if (frResponse.status !== 404) {
-          console.warn('Failed to fetch FR data:', await frResponse.text());
-        }
+        // Merge English data (field-by-field to preserve saved values like avatarUrl)
+        const mergedEnData: AppData = {
+          personalInfo: mergePersonalInfo(personalInfoEn, defaultsEn.personalInfo),
+          projects: projectsEn.length > 0 ? projectsEn : defaultsEn.projects,
+          experiences: experiencesEn.length > 0 ? experiencesEn : defaultsEn.experiences,
+          education: educationEn.length > 0 ? educationEn : defaultsEn.education,
+          skills: skillsEn.length > 0 ? skillsEn : defaultsEn.skills
+        };
+        console.log('[DataContext] Initial EN data merged:', { avatarUrl: mergedEnData.personalInfo.avatarUrl });
+        setDataEn(mergedEnData);
+        localStorage.setItem(STORAGE_KEY_EN, JSON.stringify(mergedEnData));
+
+        // Merge French data (field-by-field to preserve saved values like avatarUrl)
+        const mergedFrData: AppData = {
+          personalInfo: mergePersonalInfo(personalInfoFr, defaultsFr.personalInfo),
+          projects: projectsFr.length > 0 ? projectsFr : defaultsFr.projects,
+          experiences: experiencesFr.length > 0 ? experiencesFr : defaultsFr.experiences,
+          education: educationFr.length > 0 ? educationFr : defaultsFr.education,
+          skills: skillsFr.length > 0 ? skillsFr : defaultsFr.skills
+        };
+        console.log('[DataContext] Initial FR data merged:', { avatarUrl: mergedFrData.personalInfo.avatarUrl });
+        setDataFr(mergedFrData);
+        localStorage.setItem(STORAGE_KEY_FR, JSON.stringify(mergedFrData));
       } catch (err) {
-        console.error('Error fetching data:', err);
+        console.error('Error fetching data from Supabase:', err);
         setError('Failed to load data from server. Using local cache.');
       } finally {
         setLoading(false);
@@ -145,93 +176,125 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchData();
   }, []);
 
-  // Debounced save to API
+  // Refs to track latest state for async access
+  const dataEnRef = useRef(dataEn);
+  const dataFrRef = useRef(dataFr);
+
+  // Update refs when state changes
+  useEffect(() => { dataEnRef.current = dataEn; }, [dataEn]);
+  useEffect(() => { dataFrRef.current = dataFr; }, [dataFr]);
+
+  // Save to Supabase
   const saveToAPI = useCallback(async (lang: Language, data: AppData) => {
+    console.log(`[DataContext] saveToAPI called for ${lang}:`, { avatarUrl: data.personalInfo.avatarUrl });
     // Always save to localStorage first
     const key = lang === 'en' ? STORAGE_KEY_EN : STORAGE_KEY_FR;
     localStorage.setItem(key, JSON.stringify(data));
 
-    // Skip API calls in local development (localhost)
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-    if (isLocalhost) {
-      console.log('Local development: Skipping API save, using localStorage only');
-      return;
-    }
-
-    if (!isAuthenticated || !password) {
-      console.warn('Not authenticated, skipping API save');
-      return;
-    }
-
     setSaveStatus('saving');
 
     try {
-      const response = await fetch('/api/portfolio?lang=' + lang, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          password,
-          data
-        })
+      console.log(`[Supabase] Saving all ${lang} data...`);
+
+      // Save everything to Supabase
+      await Promise.all([
+        saveAllExperiences(data.experiences, lang),
+        saveAllEducation(data.education, lang),
+        savePersonalInfo(data.personalInfo, lang),
+        saveAllProjects(data.projects, lang),
+        saveAllSkills(data.skills, lang)
+      ]);
+
+      console.log(`[Supabase] ✅ Save successful for ${lang}`);
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (err) {
+      console.error(`[Supabase] ❌ Error saving data to Supabase (${lang}):`, err);
+      if (err instanceof Error) {
+        console.error('[Supabase] Error message:', err.message);
+      }
+      setSaveStatus('error');
+      setError(`Failed to save data to server: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
+  }, []);
+
+  // Manual save function - saves to Supabase when explicitly called
+  const saveData = useCallback(async (lang?: Language) => {
+    setSaveStatus('saving');
+
+    // Small delay to ensure all React state updates (from setInfoForm etc.) are applied
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    const langsToSave = lang ? [lang] : ['en' as Language, 'fr' as Language];
+
+    try {
+      for (const l of langsToSave) {
+        // use refs to get the ABSOLUTE LATEST state
+        // This fixes the closure issue where saveData sees old state
+        const currentData = l === 'en' ? dataEnRef.current : dataFrRef.current;
+
+        console.log(`[Supabase] Triggering save for ${l} using REF data:`, {
+          avatarUrl: currentData.personalInfo.avatarUrl,
+          timestamp: Date.now()
+        });
+
+        await saveToAPI(l, currentData);
+      }
+
+      // Wait a bit for Supabase to process
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Reload all data from Supabase to ensure UI and local state are perfectly in sync
+      console.log('[Supabase] Reloading data after save...');
+      const [
+        experiencesEn, educationEn, personalInfoEn, projectsEn, skillsEn,
+        experiencesFr, educationFr, personalInfoFr, projectsFr, skillsFr
+      ] = await Promise.all([
+        getExperiences('en'), getEducation('en'), getPersonalInfo('en'), getProjects('en'), getSkills('en'),
+        getExperiences('fr'), getEducation('fr'), getPersonalInfo('fr'), getProjects('fr'), getSkills('fr')
+      ]);
+
+      const defaultsEn = getDefaults('en');
+      const defaultsFr = getDefaults('fr');
+
+      // Update English data with field-by-field merge to preserve saved values
+      console.log('[DataContext] Post-save EN data from DB:', { avatarUrl: personalInfoEn?.avatarUrl });
+      setDataEn(prev => {
+        const merged = {
+          personalInfo: mergePersonalInfo(personalInfoEn, prev.personalInfo),
+          projects: (projectsEn && projectsEn.length > 0) ? projectsEn : prev.projects,
+          experiences: experiencesEn,
+          education: educationEn,
+          skills: (skillsEn && skillsEn.length > 0) ? skillsEn : prev.skills
+        };
+        console.log('[DataContext] Post-save EN merged result:', { avatarUrl: merged.personalInfo.avatarUrl });
+        return merged;
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to save data');
-      }
+      // Update French data with field-by-field merge to preserve saved values
+      console.log('[DataContext] Post-save FR data from DB:', { avatarUrl: personalInfoFr?.avatarUrl });
+      setDataFr(prev => {
+        const merged = {
+          personalInfo: mergePersonalInfo(personalInfoFr, prev.personalInfo),
+          projects: (projectsFr && projectsFr.length > 0) ? projectsFr : prev.projects,
+          experiences: experiencesFr,
+          education: educationFr,
+          skills: (skillsFr && skillsFr.length > 0) ? skillsFr : prev.skills
+        };
+        console.log('[DataContext] Post-save FR merged result:', { avatarUrl: merged.personalInfo.avatarUrl });
+        return merged;
+      });
 
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (err) {
-      console.error('Error saving data:', err);
+      console.error('[Supabase] saveData failed:', err);
       setSaveStatus('error');
-      setError('Failed to save data to server');
-      setTimeout(() => setSaveStatus('idle'), 3000);
+      setError(err instanceof Error ? err.message : 'Failed to save data');
+      throw err;
     }
-  }, [isAuthenticated, password]);
-
-  // Manual save function - only saves when explicitly called
-  const saveData = useCallback(async (lang?: Language) => {
-    // Small delay to ensure all React state updates are applied
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    const langsToSave = lang ? [lang] : ['en' as Language, 'fr' as Language];
-
-    for (const l of langsToSave) {
-      const data = l === 'en' ? dataEn : dataFr;
-      console.log(`Saving ${l} data:`, data);
-      await saveToAPI(l, data);
-    }
-
-    // Wait for Vercel Blob save to complete (important for production)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Reload data from localStorage to ensure UI is in sync
-    const keyEn = STORAGE_KEY_EN;
-    const keyFr = STORAGE_KEY_FR;
-    const savedEn = localStorage.getItem(keyEn);
-    const savedFr = localStorage.getItem(keyFr);
-
-    if (savedEn) {
-      try {
-        const parsedEn = JSON.parse(savedEn);
-        setDataEn(parsedEn);
-      } catch (e) {
-        console.error('Error parsing EN data:', e);
-      }
-    }
-
-    if (savedFr) {
-      try {
-        const parsedFr = JSON.parse(savedFr);
-        setDataFr(parsedFr);
-      } catch (e) {
-        console.error('Error parsing FR data:', e);
-      }
-    }
-  }, [dataEn, dataFr, saveToAPI]);
+  }, [saveToAPI]); // Removed dataEn, dataFr from dependency array as we use refs
 
   const login = async (u: string, p: string): Promise<boolean> => {
     if (u !== "admin") return false;

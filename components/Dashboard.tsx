@@ -3,6 +3,7 @@ import { useData } from '../context/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Save, Plus, Trash2, User, Briefcase, Code2, FolderGit2, X, Globe, Layout, Server, Smartphone, Image, GraduationCap } from 'lucide-react';
 import { Project, Experience, Education, Language } from '../types';
+import { uploadImage } from '../lib/storage';
 
 // Map for safe dynamic icon rendering
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
@@ -28,12 +29,21 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'info' | 'projects' | 'experience' | 'education' | 'skills' | 'images'>('info');
   const [editingLang, setEditingLang] = useState<Language>('fr');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Load data based on selected editing language
   const currentData = getRawData(editingLang);
 
   // Local state for info form
   const [infoForm, setInfoForm] = useState(currentData.personalInfo);
+
+  // Use ref to always have access to latest infoForm state
+  const infoFormRef = React.useRef(infoForm);
+
+  // Update ref whenever infoForm changes
+  React.useEffect(() => {
+    infoFormRef.current = infoForm;
+  }, [infoForm]);
 
   // Sync local form when language or data changes
   useEffect(() => {
@@ -45,9 +55,19 @@ const Dashboard: React.FC = () => {
     navigate('/');
   };
 
-  const handleInfoSave = () => {
-    updatePersonalInfo(infoForm, editingLang);
-    alert(`Personal Info (${editingLang.toUpperCase()}) Saved!`);
+  const handleInfoSave = async () => {
+    try {
+      console.log('Syncing personal info to context before save...');
+      updatePersonalInfo(infoForm, editingLang);
+
+      // Call saveData which will push to Supabase
+      await saveData(editingLang);
+
+      alert(`✅ Personal Info (${editingLang.toUpperCase()}) Saved to Supabase!`);
+    } catch (error) {
+      console.error('Error saving info:', error);
+      alert('❌ Error saving personal info. Please check the console.');
+    }
   };
 
   const handleProjectChange = (id: number, field: keyof Project, value: any) => {
@@ -76,14 +96,22 @@ const Dashboard: React.FC = () => {
   // Save data and show success message
   const handleSaveAndRedirect = async () => {
     try {
-      // Save data (this also updates React state from localStorage)
+      // For info and images tabs, we need to sync the local infoForm first
+      if (activeTab === 'info' || activeTab === 'images') {
+        // Use ref to get the absolute latest state (in case of pending updates)
+        const latestInfoForm = infoFormRef.current;
+        console.log('[Dashboard] Saving with latest infoForm:', { avatarUrl: latestInfoForm.avatarUrl });
+        updatePersonalInfo(latestInfoForm, editingLang);
+      }
+
+      // Save data (this pushes everything to Supabase)
       await saveData(editingLang);
 
       // Show success message
-      alert(`✅ Data saved successfully! (${editingLang.toUpperCase()})\n\nChanges will appear on the Home page.`);
+      alert(`✅ Data saved successfully! (${editingLang.toUpperCase()})\n\nChanges are now live in the database.`);
     } catch (error) {
       console.error('Error saving:', error);
-      alert('❌ Error saving data. Please try again.');
+      alert('❌ Error saving data. Please check the console for details.');
     }
   };
 
@@ -171,13 +199,20 @@ const Dashboard: React.FC = () => {
     updateSkills(updated, editingLang);
   };
 
-  // Helper function to convert uploaded image to base64
-  const handleImageUpload = (file: File, callback: (dataUrl: string) => void) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      callback(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+  // Helper function to upload image to Supabase Storage
+  const handleImageUpload = async (file: File, callback: (url: string) => void) => {
+    try {
+      setUploadingImage(true);
+      console.log('[Dashboard] Uploading image to Supabase Storage...');
+      const publicUrl = await uploadImage(file);
+      console.log('[Dashboard] Image uploaded successfully:', publicUrl);
+      callback(publicUrl);
+    } catch (error) {
+      console.error('[Dashboard] Image upload failed:', error);
+      alert('❌ Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   return (
@@ -324,7 +359,7 @@ const Dashboard: React.FC = () => {
                         className="hidden"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) handleImageUpload(file, (dataUrl) => setInfoForm({ ...infoForm, resumeUrl: dataUrl }));
+                          if (file) handleImageUpload(file, (uploadedUrl) => setInfoForm(prevForm => ({ ...prevForm, resumeUrl: uploadedUrl })));
                         }}
                       />
                     </label>
@@ -403,7 +438,12 @@ const Dashboard: React.FC = () => {
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if (file) handleImageUpload(file, (dataUrl) => setInfoForm({ ...infoForm, avatarUrl: dataUrl }));
+                            if (file) {
+                              handleImageUpload(file, (uploadedUrl) => {
+                                console.log('[Dashboard] Setting avatarUrl in state:', uploadedUrl);
+                                setInfoForm(prevForm => ({ ...prevForm, avatarUrl: uploadedUrl }));
+                              });
+                            }
                           }}
                         />
                       </label>
@@ -446,7 +486,7 @@ const Dashboard: React.FC = () => {
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if (file) handleImageUpload(file, (dataUrl) => setInfoForm({ ...infoForm, aboutImage: dataUrl }));
+                            if (file) handleImageUpload(file, (uploadedUrl) => setInfoForm(prevForm => ({ ...prevForm, aboutImage: uploadedUrl })));
                           }}
                         />
                       </label>
@@ -509,10 +549,12 @@ const Dashboard: React.FC = () => {
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                handleImageUpload(file, (dataUrl) => {
-                                  const updated = [...(infoForm.techStackIcons || [])];
-                                  updated[index] = dataUrl;
-                                  setInfoForm({ ...infoForm, techStackIcons: updated });
+                                handleImageUpload(file, (uploadedUrl) => {
+                                  setInfoForm(prevForm => {
+                                    const updated = [...(prevForm.techStackIcons || [])];
+                                    updated[index] = uploadedUrl;
+                                    return { ...prevForm, techStackIcons: updated };
+                                  });
                                 });
                               }
                             }}
@@ -706,6 +748,13 @@ const Dashboard: React.FC = () => {
                 );
               })}
             </div>
+            {/* Added missing save button for skills */}
+            <button
+              onClick={handleSaveAndRedirect}
+              className="flex items-center gap-2 bg-black text-white px-6 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors mt-6"
+            >
+              <Save size={18} /> Save Changes
+            </button>
           </div>
         )}
 
