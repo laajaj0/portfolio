@@ -13,18 +13,19 @@ If you are seeing a "Connection Error" or empty data on your Vercel deployment, 
     -   Click on **Environment Variables** in the left sidebar.
 
 3.  **Add Your Keys**
-    You need to add these two variables. You can find the values in your local `.env.local` file.
+    You need to add these three variables. You can find the values in your local `.env.local` file.
 
     | Key | Value (Copy from your .env.local) |
     | :--- | :--- |
     | `VITE_SUPABASE_URL` | `https://zhxzyeyivamyerztlfzj.supabase.co` |
     | `VITE_SUPABASE_ANON_KEY` | `sb_publishable_...` (copy the full key) |
+    | `BLOB_READ_WRITE_TOKEN` | `vercel_blob_rw_DfBSURzS8w1vHrMJ_...` |
 
     **Steps:**
     1.  In "Key", enter `VITE_SUPABASE_URL`
     2.  In "Value", paste your URL.
     3.  Click **Save**.
-    4.  Repeat for `VITE_SUPABASE_ANON_KEY`.
+    4.  Repeat for `VITE_SUPABASE_ANON_KEY` and `BLOB_READ_WRITE_TOKEN`.
 
 4.  **Redeploy (Important!)**
     -   Adding variables does NOT update the live site instantly.
