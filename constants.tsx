@@ -77,11 +77,11 @@ export const PERSONAL_INFO_EN: PersonalInfo = {
   title: "Web & Mobile Developer",
   bio: "Passionate developer creating Java solutions and AI applications. I love solving complex problems and building performant user interfaces.",
   aboutText: "I'm a passionate developer and AI student based in Morocco. I have a solid background in digital development and am currently pursuing a degree in Artificial Intelligence. My goal is to combine these two worlds to create smart and intuitive applications.",
-  email: "contact@example.com",
+  email: "chafaioussama2001@gmail.com",
   phone: "+212675186432",
   location: "Morocco",
   linkedin: "https://www.linkedin.com/in/oussama-chafai-99a81a1a9/",
-  github: "https://github.com",
+  github: "https://github.com/laajaj0",
   avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
   techStackIcons: [
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -145,10 +145,10 @@ export const PROJECTS_EN: Project[] = [
 export const EXPERIENCES_EN: Experience[] = [
   {
     id: 2,
-    role: "Full Stack Developer",
-    company: "Freelance",
-    period: "2023 - Present",
-    description: "Developing web and mobile solutions for various clients."
+    role: "Developer",
+    company: "ECIG",
+    period: "10 March - 20 April 2024",
+    description: "Created a website for generating enrollment certificates.\nDeveloped a mobile application for school management.\nPerformed office tasks using Word and Excel."
   }
 ];
 
@@ -196,11 +196,11 @@ export const PERSONAL_INFO_FR: PersonalInfo = {
   title: "Développeur Web & Mobile",
   bio: "Développeur passionné par la création de solutions Java et l'intelligence artificielle. J'adore résoudre des problèmes complexes et créer des interfaces utilisateur performantes.",
   aboutText: "Je suis un développeur passionné et étudiant en IA basé au Maroc. J'ai une formation solide en développement digital et je poursuis actuellement une licence en Intelligence Artificielle. Mon objectif est de combiner ces deux mondes pour créer des applications intelligentes et intuitives.",
-  email: "contact@example.com",
+  email: "chafaioussama2001@gmail.com",
   phone: "+212675186432",
   location: "Maroc",
   linkedin: "https://www.linkedin.com/in/oussama-chafai-99a81a1a9/",
-  github: "https://github.com",
+  github: "https://github.com/laajaj0",
   avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
   techStackIcons: [
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg",
@@ -264,10 +264,10 @@ export const PROJECTS_FR: Project[] = [
 export const EXPERIENCES_FR: Experience[] = [
   {
     id: 2,
-    role: "Développeur Full Stack",
-    company: "Freelance",
-    period: "2023 - Présent",
-    description: "Développement de solutions web et mobiles pour divers clients."
+    role: "Développeur",
+    company: "ECIG",
+    period: "10 Mars - 20 Avril 2024",
+    description: "Création d'un site web pour l'impression d'attestations d'inscription.\nDéveloppement d'une application mobile de gestion scolaire.\nRéalisation de tâches bureautiques sur Word et Excel"
   }
 ];
 
