@@ -18,6 +18,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 import GlobalErrorBanner from './components/GlobalErrorBanner';
 
 function App() {
+  console.log('App Details:', { env: import.meta.env.MODE, build: new Date().toISOString() });
   return (
     <DataProvider>
       <GlobalErrorBanner />
