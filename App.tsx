@@ -15,21 +15,24 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+import GlobalErrorBanner from './components/GlobalErrorBanner';
+
 function App() {
   return (
     <DataProvider>
+      <GlobalErrorBanner />
       {/* Fixed: Removed the 'future' prop from HashRouter because it's not recognized by the current react-router-dom version's types. */}
       <HashRouter>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/admin/login" element={<Login />} />
-          <Route 
-            path="/admin/dashboard" 
+          <Route
+            path="/admin/dashboard"
             element={
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
