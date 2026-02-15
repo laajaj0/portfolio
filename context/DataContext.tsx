@@ -258,33 +258,37 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const defaultsEn = getDefaults('en');
       const defaultsFr = getDefaults('fr');
 
-      // Update English data with field-by-field merge to preserve saved values
-      console.log('[DataContext] Post-save EN data from DB:', { avatarUrl: personalInfoEn?.avatarUrl });
-      setDataEn(prev => {
-        const merged = {
-          personalInfo: mergePersonalInfo(personalInfoEn, prev.personalInfo),
-          projects: (projectsEn && projectsEn.length > 0) ? projectsEn : prev.projects,
-          experiences: experiencesEn,
-          education: educationEn,
-          skills: (skillsEn && skillsEn.length > 0) ? skillsEn : prev.skills
-        };
-        console.log('[DataContext] Post-save EN merged result:', { avatarUrl: merged.personalInfo.avatarUrl });
-        return merged;
-      });
+      // Update English state ONLY if we saved English (or saved all)
+      if (langsToSave.includes('en')) {
+        console.log('[DataContext] Post-save EN data from DB:', { avatarUrl: personalInfoEn?.avatarUrl });
+        setDataEn(prev => {
+          const merged = {
+            personalInfo: mergePersonalInfo(personalInfoEn, prev.personalInfo),
+            projects: (projectsEn && projectsEn.length > 0) ? projectsEn : prev.projects,
+            experiences: experiencesEn,
+            education: educationEn,
+            skills: (skillsEn && skillsEn.length > 0) ? skillsEn : prev.skills
+          };
+          console.log('[DataContext] Post-save EN merged result:', { avatarUrl: merged.personalInfo.avatarUrl });
+          return merged;
+        });
+      }
 
-      // Update French data with field-by-field merge to preserve saved values
-      console.log('[DataContext] Post-save FR data from DB:', { avatarUrl: personalInfoFr?.avatarUrl });
-      setDataFr(prev => {
-        const merged = {
-          personalInfo: mergePersonalInfo(personalInfoFr, prev.personalInfo),
-          projects: (projectsFr && projectsFr.length > 0) ? projectsFr : prev.projects,
-          experiences: experiencesFr,
-          education: educationFr,
-          skills: (skillsFr && skillsFr.length > 0) ? skillsFr : prev.skills
-        };
-        console.log('[DataContext] Post-save FR merged result:', { avatarUrl: merged.personalInfo.avatarUrl });
-        return merged;
-      });
+      // Update French state ONLY if we saved French (or saved all)
+      if (langsToSave.includes('fr')) {
+        console.log('[DataContext] Post-save FR data from DB:', { avatarUrl: personalInfoFr?.avatarUrl });
+        setDataFr(prev => {
+          const merged = {
+            personalInfo: mergePersonalInfo(personalInfoFr, prev.personalInfo),
+            projects: (projectsFr && projectsFr.length > 0) ? projectsFr : prev.projects,
+            experiences: experiencesFr,
+            education: educationFr,
+            skills: (skillsFr && skillsFr.length > 0) ? skillsFr : prev.skills
+          };
+          console.log('[DataContext] Post-save FR merged result:', { avatarUrl: merged.personalInfo.avatarUrl });
+          return merged;
+        });
+      }
 
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
