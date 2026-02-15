@@ -18,8 +18,12 @@ If you are seeing a "Connection Error" or empty data on your Vercel deployment, 
     | Key | Value (Copy from your .env.local) |
     | :--- | :--- |
     | `VITE_SUPABASE_URL` | `https://zhxzyeyivamyerztlfzj.supabase.co` |
-    | `VITE_SUPABASE_ANON_KEY` | `sb_publishable_...` (copy the full key) |
+    | `VITE_SUPABASE_ANON_KEY` | `sb_publishable_...` (Use the **Publishable** key!) |
     | `BLOB_READ_WRITE_TOKEN` | `vercel_blob_rw_DfBSURzS8w1vHrMJ_...` |
+
+    > [!CAUTION]
+    > **SECURITY WARNING**: Do **NOT** use the `sb_secret_...` key (Service Role Key). It gives full administrative access to your database and should **NEVER** be used in a frontend application (Vercel).
+    > Only use the key that starts with `sb_publishable_` for `VITE_SUPABASE_ANON_KEY`.
 
     **Steps:**
     1.  In "Key", enter `VITE_SUPABASE_URL`
